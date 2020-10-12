@@ -1,14 +1,44 @@
-prog:   const.o fun.o prog.o
-	cc const.o fun.o prog.o -o prog
+CFLAGS = -Wall -fPIC
 
-fun.o:  fun.c 
-	cc fun.c -c -o fun.o
+GENERATES = prog prog-a prog-so README
+TRASH = *.o *~ o.* *.a *.so
+TEST = *.txt
 
-prog.o: prog.c 
-	cc prog.c -c -o prog.o
+all:	README liboutput.so liboutput_static.a prog prog-a prog-so
 
-const.o:        const.c 
-	cc const.c -c -o const.o
+README:	prog
+	./$< 2> $@
+
+fun.o:	outlib.h
+
+prog.o:	outlib.h
+
+liboutput_static.a:	const.o fun.o
+	ar -rcs $@ $^
+
+liboutput.so: const.o fun.o
+	cc -shared $^ -o $@
+
+prog:	const.o fun.o prog.o
+
+prog-a:	prog.o liboutput_static.a
+	cc -L. $< -loutput_static -o $@
+
+prog-so: prog.o liboutput.so
+	cc -L. $< -loutput -o $@
+
+test: prog prog-a prog-so
+	./prog smth > prog.txt
+	./prog-a smth > prog-a.txt
+	LD_LIBRARY_PATH=`pwd` ./prog-so smth > prog-so.txt
+
+	cmp prog.txt prog-a.txt
+	cmp prog-a.txt prog-so.txt
+	rm -f $(TEST)
+	echo "\nTest successful"
 
 clean:
-	rm -f prog a.out *.o
+	rm -f $(TRASH)
+
+distclean:	clean
+	rm -rf $(GENERATES)
