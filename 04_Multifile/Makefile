@@ -4,7 +4,7 @@ GENERATES = prog prog-a prog-so README
 TRASH = *.o *~ o.* *.a *.so
 TEST = *.txt
 
-all:	README liboutput.so liboutput_static.a prog prog-a prog-so
+all:	README prog prog-a prog-so
 
 README:	prog
 	./$< 2> $@
@@ -28,6 +28,14 @@ prog-so: prog.o liboutput.so
 	cc -L. $< -loutput -o $@
 
 test: prog prog-a prog-so
+	./prog > prog.txt
+	./prog-a > prog-a.txt
+	LD_LIBRARY_PATH=`pwd` ./prog-so > prog-so.txt
+
+	cmp prog.txt prog-a.txt
+	cmp prog-a.txt prog-so.txt
+	rm -f $(TEST)
+
 	./prog smth > prog.txt
 	./prog-a smth > prog-a.txt
 	LD_LIBRARY_PATH=`pwd` ./prog-so smth > prog-so.txt
@@ -35,6 +43,15 @@ test: prog prog-a prog-so
 	cmp prog.txt prog-a.txt
 	cmp prog-a.txt prog-so.txt
 	rm -f $(TEST)
+
+	./prog a b c > prog.txt
+	./prog-a a b c > prog-a.txt
+	LD_LIBRARY_PATH=`pwd` ./prog-so a b c > prog-so.txt
+
+	cmp prog.txt prog-a.txt
+	cmp prog-a.txt prog-so.txt
+	rm -f $(TEST)
+
 	echo "\nTest successful"
 
 clean:
