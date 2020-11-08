@@ -1,5 +1,6 @@
 #include "buf.h"
 
+#suite fixed
 #test init
     float *a = 0;
     ck_assert_msg(buf_capacity(a) == 0, "capacity init");
