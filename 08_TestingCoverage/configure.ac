@@ -25,6 +25,8 @@ AC_CHECK_TYPES([ptrdiff_t])
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 
+AM_CONDITIONAL([COND_GCOV],[test '!' "$enable_gcov" = no])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  tests/Makefile])
